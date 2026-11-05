@@ -1,12 +1,23 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { ems } from "./load.mjs";
+import * as engine from "../dist/services/energy/engine.js";
+import * as contracts from "@greensite/contracts";
+import * as seed from "../dist/services/sites/seed.js";
+import { reportCSV as exportCSV } from "../dist/services/energy/report.js";
+import { localAnalysis as analyzeLocal } from "../dist/services/assistant/analysis.js";
+const ems = {
+  ...engine,
+  ...contracts,
+  ...seed,
+  reportCSV: exportCSV,
+  localAnalysis: analyzeLocal,
+};
 const {
   simulate,
   SITES,
   defaultConfig,
   parseConfig,
-  parseRequest,
+  parseSimulationRequest,
   STEP_HOURS: dt,
   FACTORS: f,
   reportCSV,
@@ -160,7 +171,7 @@ test("invalid input is rejected and unknown fields removed", () => {
   ])
     assert.throws(() => parseConfig(v));
   assert.equal(parseConfig({ ...c, injected: "ignored" }).injected, undefined);
-  assert.throws(() => parseRequest({ siteId: "unknown", config: c }));
+  assert.throws(() => parseSimulationRequest({ siteId: "bad id", config: c }));
 });
 test("report includes provenance, baseline and 96 data rows; analysis is explicitly local", () => {
   const s = simulate(SITES[0], defaultConfig(SITES[0])),

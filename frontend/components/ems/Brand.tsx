@@ -1,5 +1,5 @@
-import type { CSSProperties } from "react";
 import { BRAND_ART, type BrandAsset } from "@/lib/brand";
+import type { CSSProperties } from "react";
 
 /** Display a viewport of the supplied board; the source image is not altered. */
 export function BrandArt({

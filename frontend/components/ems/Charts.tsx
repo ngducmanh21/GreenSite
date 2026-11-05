@@ -1,7 +1,8 @@
 "use client";
-import { BatteryCharging, Fuel, Sun, UtilityPole } from "lucide-react";
-import { formatNumber as n, type Point, type Simulation } from "@/lib/ems";
 import { BRAND_COLORS, type BrandAsset } from "@/lib/brand";
+import { formatNumber as n } from "@/lib/format";
+import type { Point, Simulation } from "@greensite/contracts";
+import { BatteryCharging, Fuel, Sun, UtilityPole } from "lucide-react";
 import { BrandArt } from "./Brand";
 const series = [
   { key: "load", name: "Phụ tải", color: BRAND_COLORS.forest },

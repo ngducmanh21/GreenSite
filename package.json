@@ -1,0 +1,30 @@
+{
+  "name": "greensite",
+  "version": "0.3.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "backend",
+    "frontend"
+  ],
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "build:backend": "npm run build -w @greensite/contracts && npm run build -w @greensite/backend",
+    "build": "npm run build:backend && npm run build -w greensite-ems",
+    "dev": "npm run build:backend && node --env-file-if-exists=.env scripts/run.mjs --dev",
+    "start": "node --env-file-if-exists=.env scripts/run.mjs",
+    "test": "npm run build:backend && npm test -w @greensite/backend",
+    "typecheck": "npm run build:backend && npm run typecheck -w greensite-ems",
+    "format": "prettier --write backend/common backend/services backend/tests packages/contracts/src frontend/app frontend/components/ems frontend/tests frontend/hooks frontend/lib scripts *.json compose.yaml",
+    "format:check": "prettier --check backend/common backend/services backend/tests packages/contracts/src frontend/app frontend/components/ems frontend/tests frontend/hooks frontend/lib scripts *.json compose.yaml",
+    "test:browser": "npm run test:browser -w greensite-ems"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.5.3",
+    "prettier": "^3.9.10"
+  }
+}

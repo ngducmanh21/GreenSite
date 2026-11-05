@@ -25,3 +25,9 @@ next-env.d.ts
 .DS_Store
 Thumbs.db
 *.log
+
+# Site-service persistence
+*.sqlite
+*.sqlite-*
+*.db
+*.db-*

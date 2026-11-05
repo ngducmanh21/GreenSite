@@ -1,7 +1,8 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { api } from "@/lib/api";
+import type { Simulation } from "@greensite/contracts";
 import { ArrowUp, Check, Loader2, LockKeyhole } from "lucide-react";
-import type { Simulation } from "@/lib/ems";
+import { useEffect, useRef, useState } from "react";
 import { BrandArt, BrandMark } from "./Brand";
 type Message = { role: "user" | "assistant"; content: string; mode?: string };
 export function Assistant({ sim }: { sim: Simulation }) {
@@ -16,10 +17,12 @@ export function Assistant({ sim }: { sim: Simulation }) {
     end = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const ac = new AbortController();
-    fetch("/api/assistant", { signal: ac.signal })
-      .then((r) => r.json())
+    api
+      .assistantStatus(ac.signal)
       .then((d) => setAvailable(d.available === true))
-      .catch(() => {});
+      .catch((error) => {
+        if (!ac.signal.aborted) setError(error.message);
+      });
     return () => {
       ac.abort();
       controller.current?.abort();
@@ -39,13 +42,8 @@ export function Assistant({ sim }: { sim: Simulation }) {
     const abort = new AbortController();
     controller.current = abort;
     try {
-      const response = await fetch("/api/assistant", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(mode === "openai" ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({
+      const data = await api.ask(
+        {
           siteId: sim.site.id,
           config: sim.config,
           question: text.trim(),
@@ -53,12 +51,10 @@ export function Assistant({ sim }: { sim: Simulation }) {
           history: previous
             .slice(-6)
             .map(({ role, content }) => ({ role, content })),
-        }),
-        signal: abort.signal,
-      });
-      const data = await response.json();
-      if (!response.ok)
-        throw new Error(data.error ?? "Không thể nhận phản hồi.");
+        },
+        token,
+        abort.signal,
+      );
       setMessages((old) => [
         ...old,
         { role: "assistant", content: data.answer, mode: data.mode },
@@ -100,7 +96,9 @@ export function Assistant({ sim }: { sim: Simulation }) {
               setError("");
             }}
           >
-            <option value="local">Phân tích cục bộ · không cần API key</option>
+            <option value="local">
+              Phân tích theo quy tắc · không cần API key
+            </option>
             <option value="openai" disabled={!available}>
               OpenAI {available ? "· đã cấu hình" : "· chưa cấu hình máy chủ"}
             </option>
@@ -214,7 +212,7 @@ export function Assistant({ sim }: { sim: Simulation }) {
         </form>
         <p className="chat-disclaimer">
           {mode === "local"
-            ? "Phản hồi theo quy tắc cục bộ, không phải AI sinh văn bản."
+            ? "Phản hồi theo quy tắc của hệ thống, không phải AI sinh văn bản."
             : "AI có thể sai. Đối chiếu các con số với báo cáo mô phỏng."}{" "}
           Không có quyền điều khiển thiết bị.
         </p>
@@ -260,8 +258,8 @@ export function Assistant({ sim }: { sim: Simulation }) {
         </div>
         {!available && (
           <p className="footnote">
-            Bật AI bằng OPENAI_API_KEY, OPENAI_MODEL và AI_ACCESS_TOKEN trong
-            .env.local. Xem README của dự án.
+            Cấu hình service trợ lý bằng OPENAI_API_KEY, OPENAI_MODEL và
+            AI_ACCESS_TOKEN trong .env.local. Xem README của dự án.
           </p>
         )}
       </aside>

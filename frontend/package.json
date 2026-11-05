@@ -1,26 +1,26 @@
 {
   "name": "greensite-ems",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "scripts": {
     "dev": "next dev --hostname 127.0.0.1",
-    "build": "next build",
-    "start": "next start --hostname 127.0.0.1",
-    "lint": "tsc --noEmit",
-    "typecheck": "tsc --noEmit",
-    "test": "node --test tests/*.test.mjs",
-    "format": "prettier --write app components/ems lib tests package.json",
-    "format:check": "prettier --check app components/ems lib tests package.json",
+    "build": "next build && node ../scripts/copy-standalone.mjs",
+    "start": "node ../scripts/start-frontend.mjs",
+    "lint": "npm run typecheck",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "npm test --prefix ..",
+    "format": "prettier --write app components/ems hooks lib tests package.json",
+    "format:check": "prettier --check app components/ems hooks lib tests package.json",
     "test:browser": "node tests/browser-smoke.mjs"
   },
   "dependencies": {
     "lucide-react": "1.69.0",
     "next": "16.4.5",
     "react": "19.2.9",
-    "react-dom": "19.2.9"
+    "react-dom": "19.2.9",
+    "@greensite/contracts": "0.3.0"
   },
   "devDependencies": {
-    "@types/node": "^20.14.10",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "autoprefixer": "^10.4.19",
@@ -30,6 +30,6 @@
     "typescript": "^5.5.3"
   },
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=24.0.0"
   }
 }

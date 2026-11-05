@@ -1,0 +1,61 @@
+name: greensite
+x-common: &common
+  init: true
+  restart: unless-stopped
+  networks: [backend]
+  security_opt: [no-new-privileges:true]
+x-service-env: &service-env
+  INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN:?Set a random token of at least 32 characters in .env}
+  SITES_URL: http://sites:4001
+  ENERGY_URL: http://energy:4002
+  ASSISTANT_URL: http://assistant:4003
+services:
+  sites:
+    <<: *common
+    build: { context: ., dockerfile: backend/Dockerfile, target: sites }
+    environment:
+      <<: *service-env
+      DATABASE_PATH: /app/data/greensite.sqlite
+    volumes: [site-data:/app/data]
+  energy:
+    <<: *common
+    build: { context: ., dockerfile: backend/Dockerfile, target: energy }
+    environment: *service-env
+    depends_on:
+      sites: { condition: service_healthy }
+  assistant:
+    <<: *common
+    build: { context: ., dockerfile: backend/Dockerfile, target: assistant }
+    environment:
+      <<: *service-env
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-}
+      AI_ACCESS_TOKEN: ${AI_ACCESS_TOKEN:-}
+    depends_on:
+      energy: { condition: service_healthy }
+  gateway:
+    <<: *common
+    build: { context: ., dockerfile: backend/Dockerfile, target: gateway }
+    environment: *service-env
+    ports: ["127.0.0.1:4000:4000"]
+    depends_on:
+      sites: { condition: service_healthy }
+      energy: { condition: service_healthy }
+      assistant: { condition: service_healthy }
+  frontend:
+    init: true
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args: { GATEWAY_URL: "http://gateway:4000" }
+    ports: ["127.0.0.1:3000:3000"]
+    networks: [backend]
+    security_opt: [no-new-privileges:true]
+    depends_on:
+      gateway: { condition: service_healthy }
+networks:
+  backend:
+    driver: bridge
+volumes:
+  site-data:

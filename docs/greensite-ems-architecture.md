@@ -1,33 +1,35 @@
-# GreenSite EMS — Kiến trúc đề xuất
+# GreenSite EMS — Kiến trúc microservices hiện hành
 
-Tài liệu hiện hành thay thế thiết kế AI Agent tính carbon BOQ. MVP hiện có Web Next.js, API mô phỏng/trợ lý và bộ tính năng lượng TypeScript. Edge và hạ tầng SaaS nhiều khách hàng chưa triển khai.
+## Các process độc lập
 
-## Luồng hệ thống
+Frontend Next.js :3000 → Gateway HTTP :4000 → Sites :4001 / Energy :4002 / Assistant :4003. Assistant gọi Energy qua HTTP; Energy đọc site từ Sites qua HTTP. Site service sở hữu SQLite; không có service khác truy cập database này.
 
-Đồng hồ PCC / PV / BESS / máy phát / nhóm tải ↔ Gateway & bộ điều khiển cục bộ ↔ API tiếp nhận dữ liệu ↔ Kho chuỗi thời gian & dịch vụ tối ưu ↔ Web-SaaS.
+Mỗi service có `app.ts` (khởi tạo và dependency injection) và `main.ts` (entrypoint/lifecycle). Container build targets tách riêng trong `backend/Dockerfile`. `packages/contracts` chỉ chứa DTO và validation, không chứa engine hoặc seed dữ liệu. Frontend không import module backend.
 
 ## Trách nhiệm
 
-- Web Next.js: dashboard danh mục công trường, sơ đồ năng lượng, cấu hình, mô phỏng, cảnh báo, báo cáo.
-- API MVP nằm trong Next.js (`/api/simulate`, `/api/assistant`). Nếu tách dịch vụ ở giai đoạn sau, Python/FastAPI có thể đảm nhiệm: phân quyền tổ chức/công trường, telemetry, biểu giá, phiên bản chính sách, tối ưu và báo cáo.
-- PostgreSQL, có thể bổ sung TimescaleDB: cấu hình, chuỗi thời gian, lịch sử sự kiện. Object storage cho báo cáo và dữ liệu nhập.
-- Gateway: adapter giao thức theo thiết bị (ví dụ Modbus); gửi telemetry qua kênh xác thực/mã hóa, buffer khi mất mạng, đồng bộ lại có khử trùng lặp.
-- Bộ điều khiển cục bộ: thực thi giới hạn công suất và chính sách đã duyệt; liên động, ATS, bảo vệ điện và giới hạn BMS do hệ thiết bị chuyên dụng đảm trách.
-- Trợ lý MVP: phân tích theo quy tắc cục bộ; OpenAI Responses API tùy chọn với key ở máy chủ, token truy cập và giới hạn yêu cầu. Backend tự tính lại dữ liệu từ cấu hình. Không dùng LLM quyết định lệnh vận hành.
+- Gateway: allowlist route/method, bounded JSON, chuyển tiếp, timeout, correlation ID. Không tính năng lượng.
+- Sites: metadata seed trong DB, cấu hình hiện tại, lịch sử và optimistic concurrency. Ghi config + history cùng transaction. Schema migration v1 bằng SQLite `user_version`.
+- Energy: dispatch model 15 phút, baseline, chi phí, carbon, cảnh báo và xuất CSV. Dữ liệu site được lấy từ service chủ sở hữu; không tin metadata/tổng số do client gửi.
+- Assistant: phân tích theo quy tắc hoặc gọi OpenAI. Nhận simulation từ Energy; không import engine. Key chỉ nằm trong process/container này.
+- Frontend: layout, các view theo tính năng, shared UI, API client và hook quản lý request bất đồng bộ. Hủy request cũ, debounce, hiển thị kết quả cũ có nhãn khi chờ/lỗi; không dùng mock data để che backend lỗi.
 
-## Hợp đồng lệnh khi triển khai giai đoạn sau
+## Tính bền vững và lỗi
 
-Lệnh có ID duy nhất, site/device, phiên bản chính sách, người duyệt, thời gian hết hạn và giới hạn. Edge kiểm tra quyền, độ mới telemetry, liên động và giới hạn trước khi chấp nhận. Phân biệt trạng thái đề xuất, duyệt, gửi, nhận, thực thi, xác minh, lỗi/hết hạn. Không suy luận thành công chỉ từ ACK; xác minh bằng phản hồi thiết bị và đo đạc.
+- `GET /health/live` cho liveness, `/health/ready` kiểm tra DB/dependency. Docker dùng readiness.
+- Body giới hạn 20 KB; external OpenAI timeout 45s, gateway timeout tối đa 60s, Next proxy timeout 65s.
+- API nội bộ yêu cầu shared token từ environment; token và body không ghi vào log.
+- `X-Request-Id` xuyên suốt các hop; lỗi có `error`, `code`, `requestId`.
+- Service xử lý SIGTERM và đóng connection; Sites đóng SQLite sau khi drain.
+- Kịch bản dùng expectedRevision, trả 409 nếu có người lưu trước; không tự ghi đè.
+- Quota AI hiện ở bộ nhớ một process. SQLite hiện một replica. Hai giới hạn này cần thay đổi khi scale HA.
 
-Không phát lại lệnh hết hạn khi nối mạng lại. Lưu audit log cho thay đổi cấu hình, thao tác thủ công và mọi chuyển trạng thái.
+## Triển khai
 
-## Mất kết nối và trạng thái bất thường
+`npm run dev` / `npm start` khởi chạy năm process local. Docker Compose khởi chạy năm container trong network riêng, chỉ publish UI/gateway trên loopback; SQLite volume chỉ mount vào Sites. Cả hai cách đều dùng chung API contract. Database npm và Docker là hai store riêng.
 
-Mất cloud: edge giữ chính sách cục bộ hợp lệ và buffer dữ liệu. Mất đo PCC hoặc tín hiệu quan trọng: chuyển chế độ dự phòng an toàn theo thiết kế điện được duyệt, không tiếp tục tối ưu dựa trên số liệu cũ. Phương án giảm PV/ngừng xả/cô lập nguồn phải được xác định cho từng cấu hình; phần mềm không tự thay thế bảo vệ phần cứng.
+## Những phần chưa triển khai
 
-## Lộ trình
+API gateway khác gateway thiết bị/PLC. Chưa có telemetry thực, quyền điều khiển hoặc vòng Zero-Export thời gian thực. Chưa có auth đa người dùng, tenant/RBAC, queue, phân tán quota, PostgreSQL HA hoặc lịch sử kiểm kê đạt chuẩn. Kiến trúc hiện tại phục vụ ứng dụng mô phỏng với persistence phía server.
 
-1. Simulator phát telemetry và dashboard, tối ưu theo quy tắc, báo cáo baseline.
-2. Gateway chỉ đọc trên một công trường; đánh giá chất lượng dữ liệu và mô hình.
-3. Chế độ đề xuất có người duyệt, thử nghiệm phần cứng trong điều kiện kiểm soát.
-4. Vận hành tự động trong phạm vi đã nghiệm thu; mở rộng nhiều công trường.
+Khi triển khai edge, bảo vệ điện và liên động vẫn ở thiết bị chuyên dụng; cloud chỉ đề xuất lịch/chính sách. Mất cloud phải có chính sách cục bộ đã nghiệm thu, không dựa vào LLM hay dữ liệu PCC cũ để điều khiển.

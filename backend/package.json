@@ -1,0 +1,17 @@
+{
+  "name": "@greensite/backend",
+  "version": "0.3.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "node --test tests/*.test.mjs",
+    "start:gateway": "node dist/services/gateway/main.js",
+    "start:sites": "node dist/services/sites/main.js",
+    "start:energy": "node dist/services/energy/main.js",
+    "start:assistant": "node dist/services/assistant/main.js"
+  },
+  "dependencies": {
+    "@greensite/contracts": "0.3.0"
+  }
+}

@@ -1,0 +1,57 @@
+import type { Site, Config } from "@greensite/contracts";
+export const SITES: Site[] = [
+  {
+    id: "riverside",
+    name: "Riverside Tower",
+    location: "TP. Hồ Chí Minh",
+    code: "HCM · 01",
+    baseLoad: 230,
+    generatorKW: 400,
+    batteryKW: 180,
+    pvKW: 420,
+    batteryKWh: 600,
+    gridLimitKW: 400,
+  },
+  {
+    id: "logistics",
+    name: "Long An Logistics",
+    location: "Long An",
+    code: "LA · 02",
+    baseLoad: 310,
+    generatorKW: 500,
+    batteryKW: 250,
+    pvKW: 650,
+    batteryKWh: 900,
+    gridLimitKW: 500,
+  },
+  {
+    id: "metro",
+    name: "Metro Depot",
+    location: "Hà Nội",
+    code: "HN · 03",
+    baseLoad: 185,
+    generatorKW: 300,
+    batteryKW: 120,
+    pvKW: 260,
+    batteryKWh: 400,
+    gridLimitKW: 320,
+  },
+];
+export function defaultConfig(site: Site): Config {
+  return {
+    pvKW: site.pvKW,
+    batteryKWh: site.batteryKWh,
+    reservePct: 20,
+    loadPct: 100,
+    gridLimitKW: site.gridLimitKW,
+    weather: "sunny",
+    strategy: "economic",
+    zeroExport: true,
+    shiftLoad: true,
+    outage: false,
+    offPeakRate: 1800,
+    normalRate: 2900,
+    peakRate: 5100,
+    dieselPrice: 23000,
+  };
+}

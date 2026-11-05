@@ -62,4 +62,4 @@ Pilot thực tế cần khảo sát sơ đồ điện, khả năng inverter/BMS/
 
 ## 9. Phạm vi triển khai hiện tại
 
-Đã có dashboard, ba công trường mẫu, mô phỏng 96 bước/ngày, điều chỉnh cấu hình, cảnh báo, CSV/in PDF và trợ lý (cục bộ + OpenAI tùy chọn). Cấu hình lưu localStorage theo công trường. API dùng Next.js; không cần dịch vụ Python riêng. Chưa có đăng nhập, tenant, cơ sở dữ liệu hoặc telemetry/gateway thật. Chi tiết chạy và kiểm thử nằm trong README.
+Đã có dashboard, ba công trường mẫu, mô phỏng 96 bước/ngày, điều chỉnh cấu hình, cảnh báo, CSV/in PDF và trợ lý (theo quy tắc + OpenAI tùy chọn). Backend gồm Gateway, Site service, Energy service và Assistant service chạy riêng qua HTTP. Cấu hình/lịch sử lưu SQLite do Site service sở hữu, có kiểm tra revision khi lưu. Frontend tách theo layout/view/shared component, không còn engine hoặc API nghiệp vụ. Chưa có đăng nhập, tenant, CRUD công trường tùy ý hoặc telemetry/gateway thiết bị thật. Chi tiết chạy và kiểm thử nằm trong README.
