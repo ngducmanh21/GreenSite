@@ -58,8 +58,10 @@ export function parseConfig(raw: unknown): Config {
     result[key] = r[key];
   }
   if (
-    !["sunny", "cloudy"].includes(String(r.weather)) ||
-    !["economic", "solar"].includes(String(r.strategy))
+    typeof r.weather !== "string" ||
+    !["sunny", "cloudy"].includes(r.weather) ||
+    typeof r.strategy !== "string" ||
+    !["economic", "solar"].includes(r.strategy)
   )
     throw new Error("Chế độ mô phỏng không hợp lệ.");
   return { ...result, weather: r.weather, strategy: r.strategy } as Config;
@@ -143,6 +145,7 @@ export type EmissionFactors = {
   efficiency: number;
 };
 export type ScenarioRecord = {
+  presets: ScenarioPreset[];
   persistence: "sqlite" | "demo";
   site: Site;
   config: Config;
@@ -168,4 +171,73 @@ export function parseSimulationRequest(raw: unknown): SimulationRequest {
   if (typeof r.siteId !== "string" || !/^[a-z0-9-]{1,80}$/.test(r.siteId))
     throw new Error("Mã công trường không hợp lệ.");
   return { siteId: r.siteId, config: parseConfig(r.config) };
+}
+
+export type ScenarioPreset = {
+  id: string;
+  title: string;
+  description: string;
+  config: Config;
+};
+export type CompareRequest = {
+  siteId: string;
+  reference: Config;
+  candidate: Config;
+};
+export type ScenarioComparison = {
+  siteId: string;
+  modelVersion: string;
+  date: string;
+  reference: { config: Config; totals: Totals };
+  candidate: { config: Config; totals: Totals };
+  comparable: boolean;
+  reasons: string[];
+  costChange: number;
+  carbonChange: number;
+  savingsPct: number | null;
+};
+export function parseCompareRequest(raw: unknown): CompareRequest {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw))
+    throw new Error("Yêu cầu so sánh không hợp lệ.");
+  const r = raw as Record<string, unknown>;
+  const reference = parseSimulationRequest({
+    siteId: r.siteId,
+    config: r.reference,
+  });
+  return {
+    siteId: reference.siteId,
+    reference: reference.config,
+    candidate: parseConfig(r.candidate),
+  };
+}
+export const SCENARIO_FILE_MAX_BYTES = 20000;
+export type ScenarioFile = {
+  format: "greensite-scenario";
+  version: 1;
+  siteId: string;
+  exportedAt: string;
+  config: Config;
+};
+export function parseScenarioFile(raw: unknown): ScenarioFile {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw))
+    throw new Error("Tệp cấu hình không hợp lệ.");
+  const r = raw as Record<string, unknown>;
+  if (r.format !== "greensite-scenario" || r.version !== 1)
+    throw new Error(
+      "Tệp không đúng định dạng GreenSite hoặc phiên bản chưa được hỗ trợ.",
+    );
+  if (
+    typeof r.exportedAt !== "string" ||
+    r.exportedAt.length > 40 ||
+    !Number.isFinite(Date.parse(r.exportedAt))
+  )
+    throw new Error("Thời gian xuất tệp không hợp lệ.");
+  const request = parseSimulationRequest(r);
+  return {
+    format: "greensite-scenario",
+    version: 1,
+    siteId: request.siteId,
+    exportedAt: r.exportedAt,
+    config: request.config,
+  };
 }

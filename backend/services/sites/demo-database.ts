@@ -1,3 +1,4 @@
+import { scenarioPresets } from "./presets.js";
 import type { Config, ScenarioRecord } from "@greensite/contracts";
 import { HttpError } from "../../common/http.js";
 import { defaultConfig, SITES } from "./seed.js";
@@ -28,6 +29,7 @@ export function openDemoDatabase() {
         revision: 0,
         saved: false,
         updatedAt: null,
+        presets: scenarioPresets(defaultConfig(value)),
         persistence: "demo",
       };
     },

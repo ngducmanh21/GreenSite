@@ -1,4 +1,9 @@
-import { parseSimulationRequest, type Site } from "@greensite/contracts";
+import { compareScenarios } from "./compare.js";
+import {
+  parseCompareRequest,
+  parseSimulationRequest,
+  type Site,
+} from "@greensite/contracts";
 import {
   createService,
   parse,
@@ -24,6 +29,20 @@ export function createEnergyService(options: {
           ctx,
         );
         return { body: { service: "energy", status: "ok" } };
+      }
+      if (ctx.path === "/v1/compare") {
+        if (ctx.method !== "POST") methodNotAllowed();
+        const raw = await ctx.json();
+        const request = parse(() => parseCompareRequest(raw));
+        const { site } = await serviceJSON<{ site: Site }>(
+          options.sitesURL,
+          `/v1/sites/${request.siteId}`,
+          options.token,
+          ctx,
+        );
+        return {
+          body: compareScenarios(site, request.reference, request.candidate),
+        };
       }
       if (!["/v1/simulate", "/v1/reports/export"].includes(ctx.path))
         notFound();

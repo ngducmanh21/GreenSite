@@ -214,6 +214,42 @@ test("microservices integrate over HTTP, own persistence, enforce contracts and 
     },
   );
   await t.test(
+    "comparison API validates both configurations and returns canonical totals",
+    async () => {
+      const response = await call(
+        "/api/compare",
+        input({
+          siteId: "riverside",
+          reference: record.config,
+          candidate: { ...record.config, batteryKWh: 0 },
+          referenceTotals: { cost: 1 },
+        }),
+      );
+      assert.equal(response.status, 200);
+      const result = await response.json();
+      assert.ok(result.reference.totals.cost > 1);
+      assert.equal(result.candidate.config.batteryKWh, 0);
+      assert.equal((await call("/api/compare")).status, 405);
+      assert.equal(
+        (
+          await call(
+            "/api/compare",
+            input({
+              siteId: "riverside",
+              reference: record.config,
+              candidate: { ...record.config, weather: ["sunny"] },
+            }),
+          )
+        ).status,
+        400,
+      );
+      const scenario = await (
+        await call("/api/sites/riverside/scenario")
+      ).json();
+      assert.equal(scenario.presets.length, 3);
+    },
+  );
+  await t.test(
     "assistant calls energy service, keeps secrets private and gates paid requests",
     async () => {
       const local = await call(

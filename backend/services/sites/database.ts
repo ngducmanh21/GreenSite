@@ -1,3 +1,4 @@
+import { scenarioPresets } from "./presets.js";
 import { DatabaseSync } from "node:sqlite";
 import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
@@ -52,6 +53,7 @@ export function openDatabase(path: string) {
         )
         .get(id);
       return {
+        presets: scenarioPresets(defaults),
         persistence: "sqlite",
         site,
         defaults,

@@ -39,6 +39,7 @@ export function createGateway(options: {
         path = ctx.path.replace("/api/", "/v1/");
         methods = ctx.path.endsWith("/scenario") ? ["GET", "PUT"] : ["GET"];
       } else if (
+        ctx.path === "/api/compare" ||
         ctx.path === "/api/simulate" ||
         ctx.path === "/api/reports/export"
       ) {

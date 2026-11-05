@@ -16,7 +16,7 @@
 
 Theo lựa chọn hiện tại, cloud image bật `GREENSITE_DEMO_MODE=1`. Sites service đọc danh mục/cấu hình mẫu và trả `persistence: "demo"`. Không tạo SQLite file và không giả vờ lưu trong bộ nhớ.
 
-Frontend hiển thị banner demo và khóa nút lưu. API PUT scenario trả `503 PERSISTENCE_NOT_CONFIGURED`; mô phỏng, CSV và phân tích theo quy tắc vẫn dùng được. Khi tải lại trang, tham số trở về cấu hình mẫu. Docker Compose/local vẫn dùng SQLite như trước.
+Frontend hiển thị banner demo và khóa nút lưu. API PUT scenario trả `503 PERSISTENCE_NOT_CONFIGURED`; mô phỏng, CSV và phân tích theo quy tắc vẫn dùng được. Khi tải lại trang, tham số trở về cấu hình mẫu. Người dùng có thể xuất/nhập tệp cấu hình JSON để giữ và khôi phục phương án trên máy; ghim mốc so sánh chỉ có hiệu lực trong phiên. Docker Compose/local vẫn dùng SQLite như trước.
 
 ## Biến môi trường
 

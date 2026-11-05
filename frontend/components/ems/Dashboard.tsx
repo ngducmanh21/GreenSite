@@ -1,4 +1,5 @@
 "use client";
+import { useScenarioComparison } from "@/hooks/useScenarioComparison";
 import { useWorkspace } from "@/hooks/useWorkspace";
 import { api } from "@/lib/api";
 import type { Simulation } from "@greensite/contracts";
@@ -20,6 +21,7 @@ export default function Dashboard() {
   const [toast, setToast] = useState("");
   const notify = useCallback((message: string) => setToast(message), []);
   const workspace = useWorkspace(notify);
+  const comparison = useScenarioComparison(workspace.siteId, workspace.config);
   const [index, setIndex] = useState(52),
     [playing, setPlaying] = useState(false),
     [exporting, setExporting] = useState(false);
@@ -93,8 +95,9 @@ export default function Dashboard() {
         <div className="service-status" role="status">
           <span>
             <strong>Bản demo trực tuyến</strong> · Chưa kết nối database. Bạn có
-            thể thử kịch bản, xuất báo cáo và hỏi trợ lý; các thay đổi chưa được
-            lưu.
+            thể thử kịch bản, xuất báo cáo và hỏi trợ lý. Dùng Nhập/Xuất cấu
+            hình trong tab Kịch bản để giữ phương án bằng tệp; dữ liệu chưa lưu
+            lên máy chủ.
           </span>
         </div>
       )}
@@ -149,6 +152,10 @@ export default function Dashboard() {
           index={index}
           setIndex={setIndex}
           change={workspace.change}
+          presets={record.presets}
+          applyConfig={workspace.replaceConfig}
+          notify={notify}
+          comparison={comparison}
           saved={workspace.saved}
           saving={workspace.saving}
           canSave={record.persistence !== "demo"}

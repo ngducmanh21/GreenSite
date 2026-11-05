@@ -3,6 +3,8 @@ import type {
   AssistantRequest,
   AssistantStatus,
   Config,
+  CompareRequest,
+  ScenarioComparison,
   ScenarioRecord,
   Simulation,
   SimulationRequest,
@@ -20,9 +22,22 @@ export class ApiError extends Error {
 async function request(path: string, options: RequestInit = {}) {
   let response: Response;
   try {
-    response = await fetch(`/api${path}`, { ...options, cache: "no-store" });
+    response = await fetch(`/api${path}`, {
+      ...options,
+      cache: "no-store",
+      signal: AbortSignal.any([
+        AbortSignal.timeout(path === "/assistant" ? 65000 : 30000),
+        ...(options.signal ? [options.signal] : []),
+      ]),
+    });
   } catch (error) {
     if (options.signal?.aborted) throw error;
+    if (error instanceof Error && error.name === "TimeoutError")
+      throw new ApiError(
+        "Máy chủ phản hồi quá lâu. Vui lòng thử lại.",
+        504,
+        "REQUEST_TIMEOUT",
+      );
     throw new ApiError(
       "Không kết nối được máy chủ. Kiểm tra dịch vụ backend rồi thử lại.",
       503,
@@ -39,7 +54,16 @@ async function request(path: string, options: RequestInit = {}) {
   return response;
 }
 async function json<T>(path: string, options?: RequestInit): Promise<T> {
-  return (await request(path, options)).json();
+  try {
+    return await (await request(path, options)).json();
+  } catch (error) {
+    if (error instanceof ApiError || options?.signal?.aborted) throw error;
+    throw new ApiError(
+      "Không đọc được phản hồi máy chủ. Vui lòng thử lại.",
+      502,
+      "INVALID_RESPONSE",
+    );
+  }
 }
 function body(value: unknown, signal?: AbortSignal): RequestInit {
   return {
@@ -61,6 +85,8 @@ export const api = {
       ...body({ config, expectedRevision }),
       method: "PUT",
     }),
+  compare: (input: CompareRequest, signal?: AbortSignal) =>
+    json<ScenarioComparison>("/compare", body(input, signal)),
   simulate: (input: SimulationRequest, signal?: AbortSignal) =>
     json<Simulation>("/simulate", body(input, signal)),
   assistantStatus: (signal?: AbortSignal) =>

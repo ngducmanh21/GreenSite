@@ -164,7 +164,7 @@ export function Comparison({ sim }: { sim: Simulation }) {
   ];
   return (
     <Panel
-      title="So sánh hai phương án"
+      title="So sánh với baseline"
       subtitle="Cùng PV và tổng nhu cầu; baseline không điều phối pin/dịch tải"
     >
       <div className="table-scroll">

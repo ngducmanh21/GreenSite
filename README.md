@@ -113,6 +113,7 @@ Các cấu hình localStorage của MVP cũ không bị xóa nhưng không tự 
 | `/api/sites/:id/scenario` | GET / PUT | Đọc / lưu `{ config, expectedRevision }` |
 | `/api/sites/:id/history` | GET | 20 lần lưu gần nhất |
 | `/api/simulate` | POST | `{ siteId, config }` → mô phỏng 96 bước |
+| `/api/compare` | POST | `{ siteId, reference, candidate }` → so sánh hai cấu hình trên backend |
 | `/api/reports/export` | POST | `{ siteId, config }` → CSV UTF-8 có BOM |
 | `/api/assistant` | GET / POST | Trạng thái / `{ siteId, config, mode, question, history? }` |
 | `/health/live` | GET | Process gateway đang sống |
@@ -169,3 +170,11 @@ Test dùng hai công trường mẫu, lưu/thử cấu hình và khôi phục gi
 - Chưa có đăng nhập, tenant/RBAC, CRUD công trường tùy ý, MQTT/telemetry, hàng đợi hoặc PLC/edge. API public hiện dành cho workspace local chung; không triển khai public trước khi có lớp auth và quota phù hợp.
 
 Bộ nhận diện và artwork được giữ nguyên: [Brand identity](docs/brand-identity.md). Xem thêm [kiến trúc](docs/greensite-ems-architecture.md) và [đặc tả](docs/greensite-ems-specs.md).
+
+## Thử và giữ phương án năng lượng
+
+Trang Kịch bản có ba mẫu: tận dụng mặt trời, mất lưới giờ cao điểm và ít nắng/tải cao. Mỗi mẫu thay toàn bộ tham số dựa trên cấu hình gốc của công trường.
+
+Ghim cấu hình làm mốc để so sánh chi phí, carbon và tải chưa phục vụ với phương án hiện tại. Backend tính cả hai phương án; không kết luận tỷ lệ tiết kiệm khi đổi tải, thời tiết, điều kiện mất lưới, biểu giá hoặc có tải chưa phục vụ. Mốc chỉ giữ trong phiên, xóa khi đổi công trường hoặc tải lại trang; chưa tính CAPEX hay giá trị pin cuối ngày.
+
+Nhập/Xuất cấu hình dùng tệp `.greensite.json` trên máy, không lưu vào cloud. Tệp tối đa 20 KB, có phiên bản định dạng; chỉ nhập cho đúng công trường đang chọn và kiểm tra toàn bộ tham số trước khi áp dụng.

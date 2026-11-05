@@ -150,6 +150,7 @@ export function useWorkspace(notify: (message: string) => void) {
     saved,
     saving,
     change,
+    replaceConfig: (next: Config) => setConfig({ ...next }),
     reset,
     save,
     retry,

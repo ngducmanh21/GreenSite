@@ -123,7 +123,7 @@ export function AppShell({
               GreenSite EMS <span>·</span> Năng lượng cho một tương lai xanh.
             </span>
             <span>
-              Local MVP <span>·</span> Mô phỏng 1.0
+              GreenSite EMS <span>·</span> Mô phỏng 1.0
             </span>
           </footer>
         </main>
