@@ -1,0 +1,22 @@
+FROM node:24-alpine AS build
+WORKDIR /app
+COPY package.json package-lock.json tsconfig.base.json ./
+COPY packages/contracts/package.json packages/contracts/package.json
+COPY backend/package.json backend/package.json
+COPY frontend/package.json frontend/package.json
+RUN npm ci --ignore-scripts --workspace @greensite/backend --workspace @greensite/contracts --include-workspace-root
+COPY packages/contracts packages/contracts
+COPY backend backend
+RUN npm run build:backend
+
+FROM node:24-alpine
+WORKDIR /app
+# Vercel container runtime uses port 80 by default. Service bindings supply URLs.
+ENV NODE_ENV=production HOST=0.0.0.0 PORT=80 GREENSITE_DEPLOYMENT=vercel GREENSITE_DEMO_MODE=1
+COPY --from=build /app/backend/dist ./backend/dist
+COPY --from=build /app/backend/package.json ./backend/package.json
+COPY --from=build /app/packages/contracts/dist ./node_modules/@greensite/contracts/dist
+COPY --from=build /app/packages/contracts/package.json ./node_modules/@greensite/contracts/package.json
+USER node
+EXPOSE 80
+CMD ["node", "backend/dist/services/sites/main.js"]

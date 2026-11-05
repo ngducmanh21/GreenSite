@@ -11,8 +11,7 @@
     "gateway": {
       "root": ".",
       "runtime": "container",
-      "entrypoint": "Dockerfile.vercel",
-      "command": ["node", "backend/dist/services/gateway/main.js"],
+      "entrypoint": "Dockerfile.vercel.gateway",
       "bindings": [
         {
           "type": "service",
@@ -37,14 +36,12 @@
     "sites": {
       "root": ".",
       "runtime": "container",
-      "entrypoint": "Dockerfile.vercel",
-      "command": ["node", "backend/dist/services/sites/main.js"]
+      "entrypoint": "Dockerfile.vercel.sites"
     },
     "energy": {
       "root": ".",
       "runtime": "container",
-      "entrypoint": "Dockerfile.vercel",
-      "command": ["node", "backend/dist/services/energy/main.js"],
+      "entrypoint": "Dockerfile.vercel.energy",
       "bindings": [
         {
           "type": "service",
@@ -57,8 +54,7 @@
     "assistant": {
       "root": ".",
       "runtime": "container",
-      "entrypoint": "Dockerfile.vercel",
-      "command": ["node", "backend/dist/services/assistant/main.js"],
+      "entrypoint": "Dockerfile.vercel.assistant",
       "bindings": [
         {
           "type": "service",

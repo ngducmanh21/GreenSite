@@ -6,7 +6,7 @@
 
 - Root Directory của project: root repository (`.`).
 - Frontend có framework `nextjs`, build contracts dùng chung rồi build giao diện.
-- Backend dùng `Dockerfile.vercel` tại root để Docker build context chứa toàn monorepo. Mỗi service có command riêng.
+- Backend dùng các `Dockerfile.vercel.*` tại root để Docker build context chứa toàn monorepo. Mỗi image có CMD cố định đúng service; không phụ thuộc command override của nền tảng.
 - `/api/*` và `/health/*` đi vào gateway; các URL còn lại đi vào frontend.
 - Sites, Energy, Assistant không có public rewrite. Gateway/Assistant/Energy gọi nhau bằng bindings do Vercel cấp tại runtime.
 - Không đặt SITES_URL, ENERGY_URL hoặc ASSISTANT_URL thủ công trên Vercel.
