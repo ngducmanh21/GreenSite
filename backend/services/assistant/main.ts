@@ -1,9 +1,9 @@
 import { createAssistantService } from "./app.js";
-import { launch, requiredToken } from "../../common/runtime.js";
+import { launch, requiredToken, serviceURL } from "../../common/runtime.js";
 launch(
   createAssistantService({
     token: requiredToken(),
-    energyURL: process.env.ENERGY_URL ?? "http://127.0.0.1:4002",
+    energyURL: serviceURL("ENERGY_URL", "http://127.0.0.1:4002"),
     aiAccessToken: process.env.AI_ACCESS_TOKEN,
     openAI: {
       apiKey: process.env.OPENAI_API_KEY ?? "",

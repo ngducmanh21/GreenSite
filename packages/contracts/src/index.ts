@@ -143,6 +143,7 @@ export type EmissionFactors = {
   efficiency: number;
 };
 export type ScenarioRecord = {
+  persistence: "sqlite" | "demo";
   site: Site;
   config: Config;
   defaults: Config;

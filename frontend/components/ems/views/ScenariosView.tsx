@@ -12,6 +12,7 @@ type Props = {
   change: <K extends keyof Config>(key: K, value: Config[K]) => void;
   saved: boolean;
   saving: boolean;
+  canSave: boolean;
   save: () => void;
   resetConfig: () => void;
   reloadConfig: () => void;
@@ -25,6 +26,7 @@ export function ScenariosView({
   change,
   saved,
   saving,
+  canSave,
   save,
   resetConfig,
   reloadConfig,
@@ -178,14 +180,16 @@ export function ScenariosView({
             <button
               className="button primary"
               onClick={save}
-              disabled={saving || saved}
+              disabled={saving || saved || !canSave}
             >
               {saved ? <Check size={16} /> : <Save size={16} />}
-              {saved
-                ? "Đã lưu trên máy chủ"
-                : saving
-                  ? "Đang lưu…"
-                  : "Lưu kịch bản"}
+              {!canSave
+                ? "Chưa kết nối database"
+                : saved
+                  ? "Đã lưu trên máy chủ"
+                  : saving
+                    ? "Đang lưu…"
+                    : "Lưu kịch bản"}
             </button>
             <button
               className="button secondary icon-only"

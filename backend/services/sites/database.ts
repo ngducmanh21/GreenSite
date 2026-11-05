@@ -52,6 +52,7 @@ export function openDatabase(path: string) {
         )
         .get(id);
       return {
+        persistence: "sqlite",
         site,
         defaults,
         config: row ? JSON.parse(String(row.config)) : defaults,

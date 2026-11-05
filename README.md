@@ -2,6 +2,10 @@
 
 Ứng dụng mô phỏng năng lượng lai cho công trường, với frontend React/Next.js và **bốn backend service chạy độc lập qua HTTP**. Phép tính, báo cáo CSV và gọi AI nằm ở backend; frontend chỉ hiển thị, nhập cấu hình và gọi API.
 
+## Deploy chung lên Vercel
+
+Đã có `vercel.json` ở root để deploy frontend và bốn backend Services trong **một project**. Cloud đang dùng **demo chỉ đọc**, chưa cần database hosted: mô phỏng/CSV/trợ lý theo quy tắc hoạt động; nút lưu bị khóa và API không ghi dữ liệu tạm. Xem [hướng dẫn Vercel](docs/vercel-deployment.md).
+
 ## Chạy nhanh
 
 Cần **Node.js 24+** và npm. Chạy lệnh tại **root repository**, không cài riêng trong `frontend/`:

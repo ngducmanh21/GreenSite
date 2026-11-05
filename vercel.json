@@ -1,0 +1,92 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "frontend": {
+      "root": "frontend",
+      "framework": "nextjs",
+      "installCommand": "cd .. && npm ci --ignore-scripts",
+      "buildCommand": "cd .. && npm run build -w @greensite/contracts && GREENSITE_DEPLOYMENT=vercel npm run build:vercel -w greensite-ems",
+      "devCommand": "GREENSITE_DEPLOYMENT=vercel npm run dev -- --port $PORT"
+    },
+    "gateway": {
+      "root": ".",
+      "runtime": "container",
+      "entrypoint": "Dockerfile.vercel",
+      "command": ["node", "backend/dist/services/gateway/main.js"],
+      "bindings": [
+        {
+          "type": "service",
+          "service": "sites",
+          "format": "url",
+          "env": "SITES_URL"
+        },
+        {
+          "type": "service",
+          "service": "energy",
+          "format": "url",
+          "env": "ENERGY_URL"
+        },
+        {
+          "type": "service",
+          "service": "assistant",
+          "format": "url",
+          "env": "ASSISTANT_URL"
+        }
+      ]
+    },
+    "sites": {
+      "root": ".",
+      "runtime": "container",
+      "entrypoint": "Dockerfile.vercel",
+      "command": ["node", "backend/dist/services/sites/main.js"]
+    },
+    "energy": {
+      "root": ".",
+      "runtime": "container",
+      "entrypoint": "Dockerfile.vercel",
+      "command": ["node", "backend/dist/services/energy/main.js"],
+      "bindings": [
+        {
+          "type": "service",
+          "service": "sites",
+          "format": "url",
+          "env": "SITES_URL"
+        }
+      ]
+    },
+    "assistant": {
+      "root": ".",
+      "runtime": "container",
+      "entrypoint": "Dockerfile.vercel",
+      "command": ["node", "backend/dist/services/assistant/main.js"],
+      "bindings": [
+        {
+          "type": "service",
+          "service": "energy",
+          "format": "url",
+          "env": "ENERGY_URL"
+        }
+      ]
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": {
+        "service": "gateway"
+      }
+    },
+    {
+      "source": "/health/(.*)",
+      "destination": {
+        "service": "gateway"
+      }
+    },
+    {
+      "source": "/(.*)",
+      "destination": {
+        "service": "frontend"
+      }
+    }
+  ]
+}

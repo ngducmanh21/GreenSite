@@ -11,7 +11,8 @@
     "test": "npm test --prefix ..",
     "format": "prettier --write app components/ems hooks lib tests package.json",
     "format:check": "prettier --check app components/ems hooks lib tests package.json",
-    "test:browser": "node tests/browser-smoke.mjs"
+    "test:browser": "node tests/browser-smoke.mjs",
+    "build:vercel": "next build"
   },
   "dependencies": {
     "lucide-react": "1.69.0",

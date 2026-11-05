@@ -35,3 +35,13 @@ export function launch(
   process.on("SIGTERM", stop);
   process.on("SIGINT", stop);
 }
+
+export function serviceURL(
+  name: "SITES_URL" | "ENERGY_URL" | "ASSISTANT_URL",
+  local: string,
+) {
+  const url = process.env[name];
+  if (!url && process.env.GREENSITE_DEPLOYMENT === "vercel")
+    throw new Error(`Missing Vercel service binding: ${name}`);
+  return url ?? local;
+}

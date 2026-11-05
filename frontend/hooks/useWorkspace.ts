@@ -101,6 +101,10 @@ export function useWorkspace(notify: (message: string) => void) {
   }
   async function save() {
     if (!record || !config || savingLock.current) return;
+    if (record.persistence === "demo") {
+      notify("Bản demo chưa kết nối database; chưa lưu được kịch bản.");
+      return;
+    }
     savingLock.current = true;
     setSaving(true);
     try {

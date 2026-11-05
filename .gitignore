@@ -31,3 +31,8 @@ Thumbs.db
 *.sqlite-*
 *.db
 *.db-*
+
+# Vercel local metadata
+.vercel/
+.vercel
+.env*

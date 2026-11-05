@@ -1,0 +1,14 @@
+.vercel
+.git
+.claude
+.codex
+.agents
+**/node_modules
+**/.next
+**/dist
+**/.env
+**/.env.*
+**/*.sqlite*
+**/*.tsbuildinfo
+**/*.log
+data

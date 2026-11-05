@@ -89,6 +89,15 @@ export default function Dashboard() {
       simulationDate={sim.date}
       onExport={() => download(sim)}
     >
+      {record.persistence === "demo" && (
+        <div className="service-status" role="status">
+          <span>
+            <strong>Bản demo trực tuyến</strong> · Chưa kết nối database. Bạn có
+            thể thử kịch bản, xuất báo cáo và hỏi trợ lý; các thay đổi chưa được
+            lưu.
+          </span>
+        </div>
+      )}
       {(busy || workspace.simulationError) && (
         <div
           className={`service-status ${workspace.simulationError ? "failed" : ""}`}
@@ -142,6 +151,7 @@ export default function Dashboard() {
           change={workspace.change}
           saved={workspace.saved}
           saving={workspace.saving}
+          canSave={record.persistence !== "demo"}
           save={workspace.save}
           resetConfig={workspace.reset}
           reloadConfig={workspace.retry}

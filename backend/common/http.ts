@@ -219,7 +219,7 @@ export async function serviceFetch(
   } = {},
 ) {
   try {
-    return await fetch(new URL(path, base), {
+    return await fetch(serviceURLForPath(base, path), {
       method: options.method ?? "GET",
       headers: {
         "X-Service-Token": token,
@@ -267,4 +267,11 @@ export async function serviceJSON<T>(
     if (error instanceof HttpError) throw error;
     throw new HttpError(502, "Phản hồi service không hợp lệ.", "BAD_GATEWAY");
   }
+}
+
+/** Binding URLs can contain a deployment-specific path prefix. Preserve it. */
+export function serviceURLForPath(base: string, path: string) {
+  const url = new URL(base);
+  if (!url.pathname.endsWith("/")) url.pathname += "/";
+  return new URL(path.replace(/^\/+/, ""), url);
 }

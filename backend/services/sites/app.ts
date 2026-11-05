@@ -7,12 +7,16 @@ import {
   methodNotAllowed,
 } from "../../common/http.js";
 import { openDatabase } from "./database.js";
+import { openDemoDatabase } from "./demo-database.js";
 export function createSitesService(options: {
   token: string;
   dbPath: string;
+  demo?: boolean;
   log?: boolean;
 }) {
-  const database = openDatabase(options.dbPath);
+  const database = options.demo
+    ? openDemoDatabase()
+    : openDatabase(options.dbPath);
   const server = createService(
     "sites",
     async (ctx) => {
