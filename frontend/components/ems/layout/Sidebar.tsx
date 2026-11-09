@@ -59,6 +59,9 @@ export function Sidebar({
           </button>
         ))}
       </nav>
+      <a className="nav-item" href="/pilot" style={{ margin: "12px 16px" }}>
+        Pilot dữ liệu thực →
+      </a>
       <div className="sidebar-bottom">
         <div className="edge-card">
           <span className="edge-icon">

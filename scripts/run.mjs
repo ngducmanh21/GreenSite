@@ -56,7 +56,19 @@ const common = {
   ASSISTANT_URL: "http://127.0.0.1:4003",
 };
 // Only the assistant receives OpenAI credentials.
-const { OPENAI_API_KEY, OPENAI_MODEL, AI_ACCESS_TOKEN, ...withoutAI } = common;
+const {
+  OPENAI_API_KEY,
+  OPENAI_MODEL,
+  AI_ACCESS_TOKEN,
+  PILOT_ROOT_TOKEN,
+  ...withoutAI
+} = common;
+const assistantEnv = {
+  ...withoutAI,
+  OPENAI_API_KEY,
+  OPENAI_MODEL,
+  AI_ACCESS_TOKEN,
+};
 for (const [name, port] of [
   ["sites", 4001],
   ["energy", 4002],
@@ -64,12 +76,13 @@ for (const [name, port] of [
   ["gateway", 4000],
 ]) {
   start(process.execPath, [`backend/dist/services/${name}/main.js`], {
-    ...(name === "assistant" ? common : withoutAI),
+    ...(name === "assistant" ? assistantEnv : withoutAI),
     PORT: String(port),
     ...(name === "sites"
       ? {
           DATABASE_PATH:
             process.env.DATABASE_PATH || resolve(root, "data/greensite.sqlite"),
+          PILOT_ROOT_TOKEN: PILOT_ROOT_TOKEN || "",
         }
       : {}),
   });

@@ -16,6 +16,7 @@ services:
     environment:
       <<: *service-env
       DATABASE_PATH: /app/data/greensite.sqlite
+      PILOT_ROOT_TOKEN: ${PILOT_ROOT_TOKEN:-}
     volumes: [site-data:/app/data]
   energy:
     <<: *common

@@ -10,5 +10,6 @@ const service = createSitesService({
   demo,
   token: requiredToken(),
   dbPath: process.env.DATABASE_PATH ?? resolve("data/greensite.sqlite"),
+  pilotRootToken: process.env.PILOT_ROOT_TOKEN,
 });
 launch(service.server, 4001, service.close);

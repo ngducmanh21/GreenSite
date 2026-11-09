@@ -38,6 +38,12 @@ export function createGateway(options: {
         base = options.sitesURL;
         path = ctx.path.replace("/api/", "/v1/");
         methods = ctx.path.endsWith("/scenario") ? ["GET", "PUT"] : ["GET"];
+      } else if (/^\/api\/pilot(?:\/[a-z0-9-]{1,80}){0,5}$/.test(ctx.path)) {
+        base = options.sitesURL;
+        path = ctx.path.replace("/api/", "/v1/");
+        methods = ctx.path.startsWith("/api/pilot/keys/")
+          ? ["DELETE"]
+          : ["GET", "POST"];
       } else if (
         ctx.path === "/api/compare" ||
         ctx.path === "/api/simulate" ||
@@ -52,7 +58,9 @@ export function createGateway(options: {
         methods = ["GET", "POST"];
       } else notFound();
       if (!methods.includes(ctx.method)) methodNotAllowed();
-      const body = ctx.method === "GET" ? undefined : await ctx.json();
+      const body = ["GET", "DELETE"].includes(ctx.method)
+        ? undefined
+        : await ctx.json();
       const response = await serviceFetch(base, path, options.token, ctx, {
         method: ctx.method,
         body,

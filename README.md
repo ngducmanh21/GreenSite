@@ -178,3 +178,17 @@ Trang Kịch bản có ba mẫu: tận dụng mặt trời, mất lưới giờ 
 Ghim cấu hình làm mốc để so sánh chi phí, carbon và tải chưa phục vụ với phương án hiện tại. Backend tính cả hai phương án; không kết luận tỷ lệ tiết kiệm khi đổi tải, thời tiết, điều kiện mất lưới, biểu giá hoặc có tải chưa phục vụ. Mốc chỉ giữ trong phiên, xóa khi đổi công trường hoặc tải lại trang; chưa tính CAPEX hay giá trị pin cuối ngày.
 
 Nhập/Xuất cấu hình dùng tệp `.greensite.json` trên máy, không lưu vào cloud. Tệp tối đa 20 KB, có phiên bản định dạng; chỉ nhập cho đúng công trường đang chọn và kiểm tra toàn bộ tham số trước khi áp dụng.
+
+## Pilot dữ liệu công trường (local/Docker)
+
+Mở `/pilot` từ dashboard để thử luồng dữ liệu thực và quản lý nhiều tổ chức. Cấu hình `PILOT_ROOT_TOKEN` ngẫu nhiên dài tối thiểu 32 ký tự (ví dụ tạo bằng `openssl rand -hex 32`) trong `.env` (hoặc môi trường Site service), rồi dùng mã này ở mục “Tạo tổ chức đầu tiên”. Hệ thống trả **một lần** mã quản trị tổ chức. Dùng mã đó để vào pilot, cấp và thu hồi mã `admin`, `engineer`, `viewer` cho người dùng khác. Mỗi mã chỉ nhìn thấy công trường trong tổ chức của mình; các thao tác ghi có nhật ký. Mã truy cập chỉ giữ trong bộ nhớ trang, không lưu localStorage.
+
+Pilot có thể:
+
+- Tạo công trường với giới hạn điện lưới, biểu giá và hệ số phát thải khai báo. Những giá trị khởi tạo ở giao diện là **giả định**, cần đối chiếu hợp đồng và nguồn hệ số trước khi dùng.
+- Nhập số đo CSV theo mẫu cột `measuredAt,importedKwh,exportedKwh,pvKwh,dieselKwh,bessChargeKwh,bessDischargeKwh,socPct`; `measuredAt` là ISO 8601 UTC, các cột năng lượng là kWh cho một khoảng đo. Có thể thêm cột `quality` (`measured`, `estimated`, `missing`); nếu bỏ qua sẽ mặc định `estimated`. `measured` là xác nhận của người nhập, chưa phải kiểm chứng từ thiết bị. Mỗi yêu cầu nhập tối đa 48 dòng để giữ giới hạn API.
+- Tạo 96 dòng từ adapter giả lập. Những dòng này mang `source=adapter-simulated` và không được tính vào số đo thực hay đối soát hóa đơn.
+- Lưu hóa đơn theo kỳ `[periodStart, periodEnd)` tính theo ngày Việt Nam (UTC+7), nhà cung cấp, số kWh và số tiền VND. Báo cáo đối soát hóa đơn chỉ với số đo nhập có chất lượng `measured` trong cùng kỳ; báo cáo hiển thị chênh lệch và nguồn hệ số phát thải.
+- Khai báo nhóm tải thiết yếu, có thể dời lịch hoặc có thể giảm; tạo kế hoạch **simulation**. Giờ biểu giá 0–23 do người dùng khai báo; nếu bỏ trống, mọi giờ tính là giá bình thường. Tải thiết yếu giữ lịch sớm nhất, tải dời lịch được chọn theo biểu giá và PV có trong số đo cùng ngày, tải có thể giảm không tự bị cắt. Kế hoạch luôn `approved=false`, `dispatched=false`, không có API phát lệnh thiết bị.
+
+Pilot dùng SQLite local một writer. Bản Vercel hiện ở chế độ demo chỉ đọc và `/pilot` chưa hoạt động ở cloud vì chưa có database hosted. Đây là nền tảng pilot phần mềm, **chưa phải EMS điều khiển tại hiện trường**. Để vận hành thật cần model/giao thức thiết bị, sơ đồ điện, đo PCC hai chiều, bộ điều khiển edge với liên động và thử nghiệm do đội điện phê duyệt; để dùng như SaaS công khai cần identity provider, vòng đời/thu hồi mã truy cập, cơ sở dữ liệu hosted, backup và giám sát vận hành.
