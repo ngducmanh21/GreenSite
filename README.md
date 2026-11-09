@@ -15,7 +15,7 @@ npm ci
 npm run dev
 ```
 
-Mở http://127.0.0.1:3000. Launcher khởi động riêng từng service, đợi backend sẵn sàng rồi chạy frontend. Không cần OpenAI key để dùng mô phỏng và trợ lý theo quy tắc. Khi một process dừng bất thường, launcher dừng các process còn lại để tránh trạng thái nửa hoạt động.
+Mở http://127.0.0.1:3000 để xem landing page; bản mô phỏng ở `/demo`, pilot ở `/pilot`. Launcher khởi động riêng từng service, đợi backend sẵn sàng rồi chạy frontend. Không cần OpenAI key để dùng mô phỏng và trợ lý theo quy tắc. Khi một process dừng bất thường, launcher dừng các process còn lại để tránh trạng thái nửa hoạt động.
 
 Bản build production local:
 

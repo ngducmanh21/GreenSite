@@ -5,7 +5,7 @@ export const viewport: Viewport = { themeColor: "#123C2C" };
 export const metadata: Metadata = {
   title: "GreenSite EMS — Điều phối năng lượng công trường",
   description:
-    "Mô phỏng và quản lý điện lưới, điện mặt trời, BESS và diesel. So sánh chi phí, kiểm soát Zero-Export và phân tích năng lượng với trợ lý AI.",
+    "Khám phá GreenSite EMS: mô phỏng điều phối điện lưới, mặt trời, BESS và diesel cho công trường; so sánh phương án và báo cáo năng lượng có nguồn giả định.",
   robots: { index: false, follow: false },
   icons: { icon: "/brand/mark.svg" },
 };

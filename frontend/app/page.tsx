@@ -1,4 +1,5 @@
-import Dashboard from "@/components/ems/Dashboard";
+import LandingPage from "@/components/landing-ems/LandingPage";
+
 export default function Home() {
-  return <Dashboard />;
+  return <LandingPage />;
 }

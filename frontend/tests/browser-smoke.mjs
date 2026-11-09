@@ -58,7 +58,7 @@ await send("Emulation.setDeviceMetricsOverride", {
   deviceScaleFactor: 1,
   mobile: false,
 });
-await send("Page.navigate", { url: "http://127.0.0.1:3000" });
+await send("Page.navigate", { url: "http://127.0.0.1:3000/demo" });
 await wait(
   'document.querySelector(".kpi-grid") && document.readyState === "complete"',
 );

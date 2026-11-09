@@ -346,7 +346,7 @@ export default function PilotPage() {
               Adapter giả lập · Không gửi lệnh đến thiết bị điện
             </p>
           </div>
-          <Link className="text-emerald-700 underline" href="/">
+          <Link className="text-emerald-700 underline" href="/demo">
             Về mô phỏng
           </Link>
         </header>
